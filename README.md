@@ -120,6 +120,38 @@ $ npm start
 
 <br>
 
+### Utilizando Docker
+
+1. Edite o arquivo _.env_ de acordo com sua necessiade.
+
+2. Considere as seguintes variáveis:
+
+  - *DB_PORT* : Porta que o container do banco vai escutar;
+  - *DB_PASSWORD* : Senha do banco;
+  - *DB_USER* : Usuário do banco;
+  - *DB_NAME* : Nome do banco;
+  - *DB_HOST* : IP ou hostname do banco;
+  - *FOODFY_PORT* : Porta da interface web do foodfy;
+
+3. Para iniciar basta usar o compose:
+
+```sh
+docker-compose up -d
+```
+
+4. Para parar a execução e iniciar a aplicação:
+
+```sh
+docker-compose stop # Para a execução.
+docker-compose start # Reinicia a aplicação pois os contêineres já foram criados no passo 3.
+```
+
+5. Remover os containers (isso apaga o banco):
+
+```sh
+docker-compose down
+```
+
 ### Acessando a Área Administrativa
 
 Selecione um email da tabela users, acesse a tela de login e entre utilizando o mesmo com a senha "rocket" (senha padrão).
