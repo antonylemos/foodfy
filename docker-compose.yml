@@ -17,10 +17,15 @@ services:
       - FOODFY_PORT=${FOODFY_PORT}
       - DB_PORT=${DB_PORT}
 
+  email:
+    build: .
+    depends_on:
+      rabbitmq: 
+        condition: service_healthy
+    command: [ "node", "src/email/email-api.js" ]
+
   run_seed:
-    build: 
-      dockerfile: Dockerfile.seed
-      context: .
+    build: .
     depends_on:
       postgres:
         condition: service_healthy
@@ -29,7 +34,8 @@ services:
       - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
       - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT} 
+      - DB_PORT=${DB_PORT}
+    command: [ "node", "seed.js" ]
 
   postgres:
     image: postgres
@@ -47,6 +53,22 @@ services:
       timeout: 10s
       retries: 30
       start_period: 30s
+
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - ${RABBIT_PORT-15672}:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    
+    
 
   #pgadmin:
   #  image: dpage/pgadmin4

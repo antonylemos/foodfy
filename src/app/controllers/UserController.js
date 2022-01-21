@@ -5,7 +5,7 @@ const { unlinkSync } = require('fs');
 const User = require('../models/User');
 const File = require('../models/File');
 const loadRecipeService = require('../services/LoadRecipeService');
-const mailer = require('../../lib/mailer');
+const queue = require('../../lib/queue');
 const { emailTemplate, getParams } = require('../../lib/utils');
 
 module.exports = {
@@ -36,8 +36,9 @@ module.exports = {
             let { name, email, is_admin } = req.body;
 
             is_admin = is_admin || false;
-
+            
             const userPassword = crypto.randomBytes(3).toString('hex');
+            /*
             const welcomeEmail = `
                 <h2 style="font-size: 24px; font-weight: normal;">Olá <strong>${name}</strong>,</h2>
                 <p>Seja muito bem-vindo(a) ao <strong>Foodfy</strong> :)</p>
@@ -59,14 +60,14 @@ module.exports = {
                 <p style="padding-top:16px; border-top: 2px solid #ccc">Te esperamos lá!</p>
                 <p>Equipe Foodfy.</p>
             `;
-
+            
             await mailer.sendMail({
                 to: req.body.email,
                 from: 'no-reply@foodfy.com.br',
                 subject: 'Bem-vindo ao Foodfy',
                 html: emailTemplate(welcomeEmail)
-            });
-
+            });*/
+            queue.sendToQueue("emails", req.body);
             const password = await hash(userPassword, 8);
 
             const userId = await User.create({
