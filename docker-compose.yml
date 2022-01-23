@@ -22,7 +22,7 @@ services:
     depends_on:
       rabbitmq: 
         condition: service_healthy
-    command: [ "node", "src/email/email-api.js" ]
+    command: [ "node", "src/email/email-service.js" ]
 
   run_seed:
     build: .
