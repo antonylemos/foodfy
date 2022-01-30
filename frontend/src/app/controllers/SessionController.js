@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { hash } = require('bcryptjs');
+const api = require('../services/api');
 
 const User = require('../models/User');
 const mailer = require('../../lib/mailer');
@@ -15,6 +16,8 @@ module.exports = {
         return res.redirect(`/admin/users/profile`);
     },
     logout(req, res) {
+        api.post('/admin/users/logout');
+
         req.session.destroy();
         return res.redirect('/');
     },
