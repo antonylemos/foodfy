@@ -1,4 +1,5 @@
 const { compare } = require('bcryptjs');
+const api = require('../services/api');
 
 const User = require('../models/User');
 
@@ -16,21 +17,17 @@ async function login(req, res, next) {
         error: 'Formato de email inválido!'
     });
 
-    const user = await User.findOne({ where: { email } });
+    const { data } = await api.post('/admin/users/login', {
+        email,
+        password,
+    });
 
-    if (!user) return res.render('session/login', {
+    if (!data.user) return res.render('session/login', {
         user: req.body,
         error: 'Usuário não cadastrado!'
     });
 
-    const passed = await compare(password, user.password);
-
-    if (!passed) return res.render('session/login', {
-        user: req.body,
-        error: 'Senha incorreta! Tente novamente.'
-    });
-
-    req.user = user;
+    req.user = data.user;
 
     next();
 }

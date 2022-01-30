@@ -12,8 +12,8 @@ const SessionValidator = require('../app/validators/session');
 const { onlyUsers, isAdmin, isLoggedRedirectToProfile } = require('../app/middlewares/sessions');
 
 // Login/logout //
-routes.get('/login', isLoggedRedirectToProfile, SessionController.loginForm);
-routes.post('/login', SessionValidator.login, SessionController.login)
+// routes.get('/login', isLoggedRedirectToProfile, SessionController.loginForm);
+routes.post('/login', SessionController.login)
 routes.post('/logout', SessionController.logout);
 
 // Profile //
