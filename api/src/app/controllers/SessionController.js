@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { hash } = require('bcryptjs');
+const { hash, compare } = require('bcryptjs');
 
 const User = require('../models/User');
 const mailer = require('../../lib/mailer');
@@ -9,14 +9,33 @@ module.exports = {
     loginForm(req, res) {
         return res.render('session/login');
     },
-    login(req, res) {
+    async login(req, res) {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ where: { email } });
+
+        if (!user) return res.json({
+            user: req.body,
+            error: 'Usuário não cadastrado!'
+        });
+    
+        const passed = await compare(password, user.password);
+    
+        if (!passed) return res.json({
+            user: null,
+            error: 'Senha incorreta! Tente novamente.'
+        });
+
+        req.user = user;
+
         req.session.userId = req.user.id;
         req.session.isAdmin = req.user.is_admin;
-        return res.redirect(`/admin/users/profile`);
+
+        return res.json({ user });
     },
     logout(req, res) {
         req.session.destroy();
-        return res.redirect('/');
+        return;
     },
     forgotForm(req, res) {
         return res.render('session/forgot-password');
