@@ -1,11 +1,11 @@
 const faker = require('faker');
 const { hash } = require('bcryptjs');
 
-const User = require('./src/app/models/User');
-const File = require('./src/app/models/File');
-const Chef = require('./src/app/models/Chef');
-const Recipe = require('./src/app/models/Recipe');
-const RecipeFile = require('./src/app/models/RecipeFile');
+const User = require('./api/src/app/models/User');
+const File = require('./api/src/app/models/File');
+const Chef = require('./api/src/app/models/Chef');
+const Recipe = require('./api/src/app/models/Recipe');
+const RecipeFile = require('./api/src/app/models/RecipeFile');
 
 function createFiles(num, placeholder) {
     const files = [];

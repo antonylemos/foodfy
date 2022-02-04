@@ -1,10 +1,10 @@
-const api = require('../services/api');
+const homeService = require('../services/api').homeService;
 const { getParams } = require('../../lib/utils');
 
 module.exports = {
     async index(req, res) {
         try {
-            const { data } = await api.get('/');
+            const { data } = await homeService.get('/');
             return res.render('main/index', { recipes: data.recipes });
         } catch (err) {
             console.error(err);
@@ -17,7 +17,7 @@ module.exports = {
         try {
             const params = getParams(req.query, 6);
 
-            const { data } = await api.get('/recipes', {
+            const { data } = await homeService.get('/recipes', {
                 params: {
                     page: params.page,
                 },
@@ -36,7 +36,7 @@ module.exports = {
     },
     async showRecipe(req, res) {
         try {
-            const { data } = await api.get(`/recipes/${req.params.id}`);
+            const { data } = await homeService.get(`/recipes/${req.params.id}`);
             if (!data.recipe) return res.send('Receita não encontrada!');
             return res.render('main/recipe-page', { recipe: data.recipe });
         } catch (err) {
@@ -47,7 +47,7 @@ module.exports = {
         try {
             const params = getParams(req.query, 12);
 
-            const { data } = await api.get('/chefs', {
+            const { data } = await homeService.get('/chefs', {
                 params: {
                     page: params.page,
                 },
@@ -60,7 +60,7 @@ module.exports = {
     },
     async showChef(req, res) {
         try {
-            const { data } = await api.get(`/chefs/${req.params.id}`);
+            const { data } = await homeService.get(`/chefs/${req.params.id}`);
             if (!data.chef) res.send('Chef não encontrado!');
             return res.render('main/chef-profile', { chef: data.chef });
         } catch (err) {

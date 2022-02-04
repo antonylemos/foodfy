@@ -27,6 +27,6 @@ nunjucks.configure('src/app/views', {
     noCache: true
 });
 
-server.listen(process.env.FOODFY_PORT || 5000 , function () {
-    console.log(`server is running on http://localhost:${process.env.FOODFY_PORT || 5000}/`);
+server.listen(process.env.API_PORT || 5000 , function () {
+    console.log(`server is running on http://localhost:${process.env.API_PORT || 5000}/`);
 });
