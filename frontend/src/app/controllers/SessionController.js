@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { hash } = require('bcryptjs');
-const api = require('../services/api');
+const api = require('../services/api').api;
+console.log(api);
 
 const User = require('../models/User');
 const mailer = require('../../lib/mailer');
