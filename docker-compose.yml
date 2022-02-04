@@ -9,7 +9,7 @@ services:
         condition: service_completed_successfully
     ports:
       - ${FRONT_PORT-5000}:${FRONT_PORT-5000}
-    command: [ "node", "frontend/src/server.js" ]
+    working_dir: /opt/app/frontend
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_USER=${DB_USER}
@@ -29,7 +29,7 @@ services:
         condition: service_completed_successfully
     ports:
       - ${API_PORT-5001}:${API_PORT-5001}
-    command: [ "node", "api/src/server.js" ] 
+    working_dir: /opt/app/api
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_USER=${DB_USER}
@@ -50,7 +50,7 @@ services:
         condition: service_completed_successfully
     ports:
       - ${HOME_PORT-5002}:${HOME_PORT-5002}
-    command: [ "node", "home-service/src/server.js" ]  
+    working_dir: /opt/app/home-service  
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_USER=${DB_USER}
