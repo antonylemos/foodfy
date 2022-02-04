@@ -1,6 +1,8 @@
 FROM node
 
-COPY package*.json ./ 
+WORKDIR /opt/app
+
+COPY api/package*.json ./ 
 
 RUN npm install
 

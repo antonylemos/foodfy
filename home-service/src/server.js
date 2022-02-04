@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const nunjucks = require('nunjucks');
 const methodOverride = require('method-override');
 const routes = require('./routes');
@@ -6,6 +7,8 @@ const session = require('./config/session');
 
 const server = express();
 
+server.use(cors());
+server.use(express.json());
 server.use(session);
 server.use(express.urlencoded({ extended: true }));
 server.use(express.static('public'));
@@ -24,6 +27,6 @@ nunjucks.configure('src/app/views', {
     noCache: true
 });
 
-server.listen(process.env.FRONT_PORT || 3000 , function () {
-    console.log(`server is running on http://localhost:${process.env.FRONT_PORT || 3000}/`);
+server.listen(process.env.HOME_PORT || 5000 , function () {
+    console.log(`server is running on http://localhost:${process.env.HOME_PORT || 5000}/`);
 });

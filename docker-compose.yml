@@ -1,6 +1,6 @@
 services:
 
-  foodfy:
+  front:
     build: .
     depends_on:
       postgres:
@@ -8,21 +8,59 @@ services:
       run_seed:
         condition: service_completed_successfully
     ports:
-      - ${FOODFY_PORT-5000}:${FOODFY_PORT-5000}
+      - ${FRONT_PORT-5000}:${FRONT_PORT-5000}
+    working_dir: /opt/app/frontend
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
       - DB_HOST=${DB_HOST}
-      - FOODFY_PORT=${FOODFY_PORT}
+      - FRONT_PORT=${FRONT_PORT}
       - DB_PORT=${DB_PORT}
+      - API_URL=${API_URL}
+      - HOME_URL=${HOME_URL}
 
-  email:
+  api:
     build: .
     depends_on:
-      rabbitmq: 
-        condition: service_healthy
-    command: [ "node", "src/email/email-service.js" ]
+      postgres:
+        condition: service_healthy 
+      run_seed:
+        condition: service_completed_successfully
+    ports:
+      - ${API_PORT-5001}:${API_PORT-5001}
+    working_dir: /opt/app/api
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - FRONT_PORT=${FOODFY_PORT}
+      - DB_PORT=${DB_PORT}
+      - API_URL=${API_URL}
+      - HOME_URL=${HOME_URL}
+      - API_PORT=${API_PORT}
+
+  home:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy 
+      run_seed:
+        condition: service_completed_successfully
+    ports:
+      - ${HOME_PORT-5002}:${HOME_PORT-5002}
+    working_dir: /opt/app/home-service  
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - FRONT_PORT=${FOODFY_PORT}
+      - DB_PORT=${DB_PORT}
+      - API_URL=${API_URL}
+      - HOME_URL=${HOME_URL}
+      - HOME_PORT=${HOME_PORT}
 
   run_seed:
     build: .
@@ -52,22 +90,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 30
-      start_period: 30s
-
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - ${RABBIT_PORT-15672}:15672
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
-    
+      start_period: 30s    
     
 
   #pgadmin:
