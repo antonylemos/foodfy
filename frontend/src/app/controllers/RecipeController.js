@@ -1,48 +1,36 @@
-const { unlinkSync } = require('fs');
+const { unlinkSync, read } = require('fs');
 
 const Recipe = require('../models/Recipe');
 const File = require('../models/File');
 const RecipeFile = require('../models/RecipeFile');
 const loadRecipeService = require('../services/LoadRecipeService');
 const { getParams } = require('../../lib/utils');
+const api = require('../services/api');
+const { param } = require('../../../../api/src/routes/recipes');
 
 module.exports = {
     async index(req, res) {
         try {
             const params = getParams(req.query, 6);
-            const recipes = await loadRecipeService.load('recipes', params);
-            const pagination = { page: params.page };
+            const { data } = await api.get('/admin/recipes', params);
 
-            recipes.length == 0
-            ? pagination.total = 1
-            : pagination.total = Math.ceil(recipes[0].total / params.limit);
-
-            const { success } = req.session;
-
-            if (success) {
-                res.render('admin/recipes/index', { recipes, pagination, success });
-                req.session.success = '';
-                return
-            }
-            
-            return res.render('admin/recipes/index', { recipes, pagination });
+            res.render('admin/recipes/index', { 
+                recipes: data.recipes,
+                pagination: data.pagination
+            });
         } catch (err) {
             console.error(err);
         }
     },
     async userRecipes(req, res) {
         try {
-            const params = getParams(req.query, 6);
-            params.id = req.session.userId;
+            const params = getParams(req.query, 6);            
+            const {data} = await api.get('/admin/recipes/my-recipes', params);
             
-            const recipes = await loadRecipeService.load('recipes', params);
-            const pagination = { page: params.page };
-
-            recipes.length == 0
-            ? pagination.total = 1
-            : pagination.total = Math.ceil(recipes[0].total / params.limit);
-            
-            return res.render('admin/recipes/index', { recipes, pagination });
+            return res.render('admin/recipes/index', { 
+                recipes: data.recipes,
+                pagination: data.pagination
+            });
         } catch (err) {
             console.error(err);
         }
@@ -57,119 +45,65 @@ module.exports = {
     },
     async post(req, res) {
         try {
-            const { chef: chef_id, title, ingredients,
-                preparation, information } = req.body;
-
-            const recipe_id = await Recipe.create({
-                chef_id,
-                user_id: req.session.userId,
-                title,
-                ingredients,
-                preparation,
-                information
+            const { data } = await api.post('/admin/recipes', {
+                chef_id: req.body.chef,
+                title: req.body.title,
+                ingredients: req.body.ingredients,
+                preparation: req.body.preparation,
+                information: req.body.information,
+                files: req.files
             });
 
-            const filesPromise = req.files.map(async file => {
-                const file_id = await File.create({
-                    name: file.filename,
-                    path: file.path
-                });
-                await RecipeFile.create({
-                    file_id,
-                    recipe_id
-                });
-            });
-
-            await Promise.all(filesPromise);
-
-            return res.redirect(`/admin/recipes/${recipe_id}`);
+            return res.redirect(`/admin/recipes/${data.recipe_id}`);
         } catch (err) {
             console.error(err);
         }
     },
     async show(req, res) {
         try {
-            const recipe = await loadRecipeService.load('recipe', req.params.id);
-            if (!recipe) return res.send('Receita não encontrada!');
-            return res.render('admin/recipes/show', { recipe });
+            const {data} = await api.get(`admin/recipes/${req.params.id}`);
+            if (!data.recipe) return res.send('Receita não encontrada!');
+            return res.render('admin/recipes/show', { recipe: data.recipe });
         } catch (err) {
             console.error(err);
         }
     },
     async edit(req, res) {
         try {
-            const recipe = await loadRecipeService.load('recipe', req.params.id);
-            if (!recipe) return res.send('Receita não encontrada!');
+            const {data} = await api.get(`admin/recipes/${req.params.id}`);
+            if (!data.recipe) return res.send('Receita não encontrada!');
             const chefsOptions = await Recipe.chefsSelectOptions();
-            return res.render('admin/recipes/edit', { recipe, chefsOptions });
+            return res.render('admin/recipes/edit', { recipe: data.recipe, chefsOptions });
         } catch (err) {
             console.error(err);
         }
     },
     async put(req, res) {
         try {
-            let { id, removed_files, chef: chef_id, title, ingredients,
-                preparation, information } = req.body;
 
-            if (req.files.length != 0) {
-                const newFilesPromise = req.files.map(async file => {
-                    const file_id = await File.create({
-                        name: file.filename,
-                        path: file.path
-                    });
-                    await RecipeFile.create({
-                        file_id,
-                        recipe_id: id
-                    });
-                });
+            const { data } = await api.put('/admin/recipes', {
+                id: req.body.id,
+                removed_files: req.body.removed_files,
+                chef_id: req.body.chef,
+                title: req.body.title,
+                ingredients: req.body.ingredients,
+                preparation: req.body.preparation,
+                information: req.body.information,
+                files: req.files
+            })
 
-                await Promise.all(newFilesPromise);
-            }
-
-            if (removed_files) {
-                removed_files = removed_files.split(',');
-                const lastIndex = removed_files.length - 1;
-                removed_files.splice(lastIndex, 1);
-
-                const removedFilesPromise = removed_files.map(async id => {
-                    RecipeFile.delete({ file_id: id });
-                    
-                    const file = await File.findOne({ where: { id } });
-                    File.delete({ id });
-                    if (file.path != 'public/images/recipe_placeholder.png') {
-                        unlinkSync(file.path);
-                    }
-                });
-
-                await Promise.all(removedFilesPromise);
-            }
-
-            await Recipe.update(id, {
-                chef_id,
-                title,
-                ingredients,
-                preparation,
-                information
-            });
-
-            return res.redirect(`/admin/recipes/${id}`);
+            return res.redirect(`/admin/recipes/${data.id}`);
         } catch (err) {
             console.error(err);
         }
     },
     async delete(req, res) {
         try {
-            const files = await Recipe.files(req.body.id);
-            const deletedFilesPromise = files.map(file => {
-                File.delete({ id: file.file_id });
-                if (file.path != 'public/images/recipe_placeholder.png') {
-                    unlinkSync(file.path);
-                }
+            const {data} = await api.request({
+                url: 'admin/recipes',
+                method: 'delete',
+                data: { id: req.body.id }
             });
-
-            await Promise.all(deletedFilesPromise);
-            await Recipe.delete({ id: req.body.id });
-            req.session.success = 'Receita excluída com sucesso!';
 
             return res.redirect('/admin');
         } catch (err) {
