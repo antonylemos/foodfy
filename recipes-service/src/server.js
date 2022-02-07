@@ -27,6 +27,6 @@ nunjucks.configure('src/app/views', {
     noCache: true
 });
 
-server.listen(process.env.SESSIONS_PORT || 5000 , function () {
-    console.log(`server is running on http://localhost:${process.env.SESSIONS_PORT || 5000}/`);
+server.listen(process.env.RECIPES_PORT || 5000 , function () {
+    console.log(`server is running on http://localhost:${process.env.RECIPES_PORT || 5000}/`);
 });

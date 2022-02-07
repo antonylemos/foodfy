@@ -1,4 +1,4 @@
-const homeService = require('../services/api').homeService;
+const homeService = require('../services/apis').homeService;
 const { getParams } = require('../../lib/utils');
 
 module.exports = {

@@ -21,6 +21,8 @@ services:
       - HOME_URL=${HOME_URL}
       - SESSIONS_PORT=${SESSIONS_PORT}
       - SESSIONS_URL=${SESSIONS_URL}
+      - RECIPES_PORT=${RECIPES_PORT}
+      - RECIPES_URL=${RECIPES_URL}
 
   api:
     build: .
@@ -72,7 +74,7 @@ services:
       run_seed:
         condition: service_completed_successfully
     ports:
-      - ${SESSIONS_PORT-5003}:${SESSIONS_PORT-5002}
+      - ${SESSIONS_PORT-5003}:${SESSIONS_PORT-5003}
     working_dir: /opt/app/sessions-service  
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
@@ -84,6 +86,35 @@ services:
       - API_URL=${API_URL}
       - HOME_URL=${HOME_URL}
       - HOME_PORT=${HOME_PORT}
+      - SESSIONS_PORT=${SESSIONS_PORT}
+      - SESSIONS_URL=${SESSIONS_URL}
+      - RECIPES_PORT=${RECIPES_PORT}
+      - RECIPES_URL=${RECIPES_URL}
+
+  recipes:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy 
+      run_seed:
+        condition: service_completed_successfully
+    ports:
+      - ${RECIPES_PORT-5004}:${RECIPES_PORT-5004}
+    working_dir: /opt/app/recipes-service  
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - FRONT_PORT=${FOODFY_PORT}
+      - DB_PORT=${DB_PORT}
+      - API_URL=${API_URL}
+      - HOME_URL=${HOME_URL}
+      - HOME_PORT=${HOME_PORT}
+      - SESSIONS_PORT=${SESSIONS_PORT}
+      - SESSIONS_URL=${SESSIONS_URL}
+      - RECIPES_PORT=${RECIPES_PORT}
+      - RECIPES_URL=${RECIPES_URL}
 
   run_seed:
     build: .

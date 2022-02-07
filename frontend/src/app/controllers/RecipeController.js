@@ -5,14 +5,14 @@ const File = require('../models/File');
 const RecipeFile = require('../models/RecipeFile');
 const loadRecipeService = require('../services/LoadRecipeService');
 const { getParams } = require('../../lib/utils');
-const api = require('../services/api');
+const recipesService = require('../services/apis').recipesService;
 const { param } = require('../../../../api/src/routes/recipes');
 
 module.exports = {
     async index(req, res) {
         try {
             const params = getParams(req.query, 6);
-            const { data } = await api.get('/admin/recipes', params);
+            const { data } = await recipesService.get('/admin/recipes', params);
 
             res.render('admin/recipes/index', { 
                 recipes: data.recipes,
@@ -25,7 +25,7 @@ module.exports = {
     async userRecipes(req, res) {
         try {
             const params = getParams(req.query, 6);            
-            const {data} = await api.get('/admin/recipes/my-recipes', params);
+            const {data} = await recipesService.get('/admin/recipes/my-recipes', params);
             
             return res.render('admin/recipes/index', { 
                 recipes: data.recipes,
@@ -45,7 +45,7 @@ module.exports = {
     },
     async post(req, res) {
         try {
-            const { data } = await api.post('/admin/recipes', {
+            const { data } = await recipesService.post('/admin/recipes', {
                 chef_id: req.body.chef,
                 title: req.body.title,
                 ingredients: req.body.ingredients,
@@ -61,7 +61,7 @@ module.exports = {
     },
     async show(req, res) {
         try {
-            const {data} = await api.get(`admin/recipes/${req.params.id}`);
+            const {data} = await recipesService.get(`admin/recipes/${req.params.id}`);
             if (!data.recipe) return res.send('Receita não encontrada!');
             return res.render('admin/recipes/show', { recipe: data.recipe });
         } catch (err) {
@@ -70,7 +70,7 @@ module.exports = {
     },
     async edit(req, res) {
         try {
-            const {data} = await api.get(`admin/recipes/${req.params.id}`);
+            const {data} = await recipesService.get(`admin/recipes/${req.params.id}`);
             if (!data.recipe) return res.send('Receita não encontrada!');
             const chefsOptions = await Recipe.chefsSelectOptions();
             return res.render('admin/recipes/edit', { recipe: data.recipe, chefsOptions });
@@ -81,7 +81,7 @@ module.exports = {
     async put(req, res) {
         try {
 
-            const { data } = await api.put('/admin/recipes', {
+            const { data } = await recipesService.put('/admin/recipes', {
                 id: req.body.id,
                 removed_files: req.body.removed_files,
                 chef_id: req.body.chef,
@@ -99,7 +99,7 @@ module.exports = {
     },
     async delete(req, res) {
         try {
-            const {data} = await api.request({
+            const {data} = await recipesService.request({
                 url: 'admin/recipes',
                 method: 'delete',
                 data: { id: req.body.id }
