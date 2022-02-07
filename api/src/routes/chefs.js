@@ -8,12 +8,17 @@ const { onlyUsers, isAdmin } = require('../app/middlewares/sessions');
 const Validator = require('../app/validators/chef');
 
 // Chefs Admin //
-routes.get('/', onlyUsers, ChefController.index);
-routes.get('/create', onlyUsers, isAdmin, ChefController.create);
-routes.get('/:id', onlyUsers, ChefController.show);
-routes.get('/:id/edit', isAdmin, onlyUsers, ChefController.edit);
-routes.post('/', onlyUsers, isAdmin, multer.array('photos', 1), Validator.post, ChefController.post);
-routes.put('/', onlyUsers, isAdmin, multer.array('photos', 1), Validator.put, ChefController.put);
-routes.delete('/', onlyUsers, isAdmin, ChefController.delete);
+//routes.get('/', onlyUsers, ChefController.index);
+routes.get('/', ChefController.index);
+//routes.get('/create', onlyUsers, isAdmin, ChefController.create);
+//routes.get('/:id', onlyUsers, ChefController.show);
+routes.get('/:id', ChefController.show);
+//routes.get('/:id/edit', isAdmin, onlyUsers, ChefController.edit);
+//routes.post('/', onlyUsers, isAdmin, multer.array('photos', 1), Validator.post, ChefController.post);
+routes.post('/', ChefController.post);
+//routes.put('/', onlyUsers, isAdmin, multer.array('photos', 1), Validator.put, ChefController.put);
+routes.put('/', ChefController.put);
+//routes.delete('/', onlyUsers, isAdmin, ChefController.delete);
+routes.delete('/', ChefController.delete);
 
 module.exports = routes;

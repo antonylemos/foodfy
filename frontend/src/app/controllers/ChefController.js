@@ -1,30 +1,17 @@
-const { unlinkSync } = require('fs');
-
-const Chef = require('../models/Chef');
-const File = require('../models/File');
 const loadChefService = require('../services/LoadChefService');
 const { getParams } = require('../../lib/utils');
+const api = require('../services/api').api;
 
 module.exports = {
     async index(req, res) {
         try {
             const params = getParams(req.query, 12);
-            const chefs = await loadChefService.load('chefs', params);
-            const pagination = { page: params.page };
+            const { data } = await api.get('/admin/chefs', params);
 
-            chefs.length == 0
-            ? pagination.total = 1
-            : pagination.total = Math.ceil(chefs[0].total / params.limit);
-
-            const { success } = req.session;
-
-            if (success) {
-                res.render('admin/chefs/index', { chefs, pagination, success });
-                req.session.success = '';
-                return
-            }
-
-            return res.render('admin/chefs/index', { chefs, pagination });
+            return res.render('admin/chefs/index', {
+                 chefs: data.chefs, 
+                 pagination: data.pagination 
+            });
         } catch (err) {
             console.error(err);
         }
@@ -34,22 +21,21 @@ module.exports = {
     },
     async post(req, res) {
         try {
-            const { filename, path } = req.files[0];
-            const file_id = await File.create({ name: filename, path });
+            const { data } = await api.post('/admin/chefs', {
+                name: req.body.name,
+                files: req.files
+            });
 
-            const { name } = req.body;
-            const chefId = await Chef.create({ name, file_id });
-
-            return res.redirect(`/admin/chefs/${chefId}`);
+            return res.redirect(`/admin/chefs/${data.chefId}`);
         } catch (err) {
             console.error(err);
         }
     },
     async show(req, res) {
         try {
-            const chef = await loadChefService.load('chef', req.params.id);
-            if (!chef) return res.send('Chef não encontrado!');
-            return res.render('admin/chefs/show', { chef });
+            const { data } = await api.get(`admin/chefs/${req.params.id}`);
+            if (!data.chef) return res.send('Chef não encontrado!');
+            return res.render('admin/chefs/show', { chef: data.chef });
         } catch (err) {
             console.error(err);
         }
@@ -65,43 +51,30 @@ module.exports = {
     },
     async put(req, res) {
         try {
-            let file_id;
-
-            if (req.files.length != 0) {
-                const { filename, path } = req.files[0];
-                file_id = await File.create({ name: filename, path });
-            }
-
-            const { id, name, removed_files } = req.body;
-            await Chef.update(id, {
-                name,
-                file_id: file_id || req.body.file_id
+            const { data } = await api.put('/admin/chefs', {
+                id: req.body.id,
+                name: req.body.name,
+                file_id: req.body.file_id, 
+                removed_files: req.body.removed_files,
+                files: req.files
             });
 
-            if (removed_files) {
-                const removedFileId = removed_files.replace(',', '');
-                const file = await File.findOne({ where: { id: removedFileId } });
-                await File.delete({ id: removedFileId });
-                if (file.path != 'public/images/chef_placeholder.png') {
-                    unlinkSync(file.path);
-                }
-            }
-
-            return res.redirect(`/admin/chefs/${id}`);
+            return res.redirect(`/admin/chefs/${data.id}`);
         } catch (err) {
             console.error(err);
         }
     },
     async delete(req, res) {
         try {
-            await Chef.delete({ id: req.body.id });
-            const file = await File.findOne({ where: { id: req.body.file_id } });
-            await File.delete({id: file.id});
-            if (file.path != 'public/images/chef_placeholder.png') {
-                unlinkSync(file.path);
-            }
+            const {data} = await api.request({
+                url: 'admin/chefs',
+                method: 'delete',
+                data: { 
+                    id: req.body.id,
+                    file_id: req.body.file_id
+                }
+            });
 
-            req.session.success = 'Chef excluído com sucesso!';
             return res.redirect('/admin/chefs');
         } catch (err) {
             console.error(err);
