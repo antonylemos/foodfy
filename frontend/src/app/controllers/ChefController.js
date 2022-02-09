@@ -1,12 +1,12 @@
 const loadChefService = require('../services/LoadChefService');
 const { getParams } = require('../../lib/utils');
-const api = require('../services/api').api;
+const chefsService = require('../services/apis').chefsService;
 
 module.exports = {
     async index(req, res) {
         try {
             const params = getParams(req.query, 12);
-            const { data } = await api.get('/admin/chefs', params);
+            const { data } = await chefsService.get('/admin/chefs', params);
 
             return res.render('admin/chefs/index', {
                  chefs: data.chefs, 
@@ -21,7 +21,7 @@ module.exports = {
     },
     async post(req, res) {
         try {
-            const { data } = await api.post('/admin/chefs', {
+            const { data } = await chefsService.post('/admin/chefs', {
                 name: req.body.name,
                 files: req.files
             });
@@ -33,7 +33,7 @@ module.exports = {
     },
     async show(req, res) {
         try {
-            const { data } = await api.get(`admin/chefs/${req.params.id}`);
+            const { data } = await chefsService.get(`admin/chefs/${req.params.id}`);
             if (!data.chef) return res.send('Chef não encontrado!');
             return res.render('admin/chefs/show', { chef: data.chef });
         } catch (err) {
@@ -51,7 +51,7 @@ module.exports = {
     },
     async put(req, res) {
         try {
-            const { data } = await api.put('/admin/chefs', {
+            const { data } = await chefsService.put('/admin/chefs', {
                 id: req.body.id,
                 name: req.body.name,
                 file_id: req.body.file_id, 
@@ -66,7 +66,7 @@ module.exports = {
     },
     async delete(req, res) {
         try {
-            const {data} = await api.request({
+            const {data} = await chefsService.request({
                 url: 'admin/chefs',
                 method: 'delete',
                 data: { 

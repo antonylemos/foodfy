@@ -1,5 +1,5 @@
 const { compare } = require('bcryptjs');
-const api = require('../services/api').api;
+const api = require('../services/apis').api;
 
 const User = require('../models/User');
 
