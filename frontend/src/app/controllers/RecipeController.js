@@ -1,6 +1,6 @@
 const Recipe = require('../models/Recipe');
 const { getParams } = require('../../lib/utils');
-const recipesService = require('../services/api').recipesService;
+const recipesService = require('../services/apis').recipesService;
 module.exports = {
     async index(req, res) {
         try {

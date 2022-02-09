@@ -23,6 +23,8 @@ services:
       - SESSIONS_URL=${SESSIONS_URL}
       - RECIPES_PORT=${RECIPES_PORT}
       - RECIPES_URL=${RECIPES_URL}
+      - CHEFS_URL=${CHEFS_URL}
+      - CHEFS_PORT=${CHEFS_PORT}
 
   api:
     build: .
@@ -115,6 +117,31 @@ services:
       - SESSIONS_URL=${SESSIONS_URL}
       - RECIPES_PORT=${RECIPES_PORT}
       - RECIPES_URL=${RECIPES_URL}
+
+  chefs:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy 
+      run_seed:
+        condition: service_completed_successfully
+    ports:
+      - ${CHEFS_PORT-5005}:${CHEFS_PORT-5005}
+    working_dir: /opt/app/chefs-service  
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - FRONT_PORT=${FOODFY_PORT}
+      - DB_PORT=${DB_PORT}
+      - API_URL=${API_URL}
+      - HOME_URL=${HOME_URL}
+      - HOME_PORT=${HOME_PORT}
+      - SESSIONS_PORT=${SESSIONS_PORT}
+      - SESSIONS_URL=${SESSIONS_URL}
+      - CHEFS_PORT=${CHEFS_PORT}
+      - CHEFS_URL=${CHEFS_URL}
 
   run_seed:
     build: .

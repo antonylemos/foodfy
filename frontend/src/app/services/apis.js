@@ -16,4 +16,8 @@ const recipesService = axios.create({
   baseURL: process.env.RECIPES_URL,
 });
 
-module.exports = {api, homeService: homeService, sessionsService, recipesService};
+const chefsService = axios.create({
+  baseURL: process.env.CHEFS_URL,
+});
+
+module.exports = {api, homeService: homeService, sessionsService, recipesService, chefsService};
