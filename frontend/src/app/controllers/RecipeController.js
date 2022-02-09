@@ -1,13 +1,6 @@
-const { unlinkSync, read } = require('fs');
-
 const Recipe = require('../models/Recipe');
-const File = require('../models/File');
-const RecipeFile = require('../models/RecipeFile');
-const loadRecipeService = require('../services/LoadRecipeService');
 const { getParams } = require('../../lib/utils');
-const recipesService = require('../services/apis').recipesService;
-const { param } = require('../../../../api/src/routes/recipes');
-
+const recipesService = require('../services/api').recipesService;
 module.exports = {
     async index(req, res) {
         try {
